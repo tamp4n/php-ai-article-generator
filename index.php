@@ -5,7 +5,7 @@ $topic = '';
 $error = '';
 
 /**
- * Sanitize input function to prevent SQL injection and XSS attacks
+ * Sanitize input function to prevent SQL injections and XSS attacks
  *
  * @param string $input The user input to sanitize
  * @return string The sanitized input
@@ -33,15 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['ajax_request']) && $_POST['ajax_request'] === 'generate') {
         // Sanitize the topic input
         $topic = isset($_POST['topic']) ? sanitizeInput($_POST['topic']) : '';
-        
+
         // Validate the length option (only allow predefined values)
         $allowedLengths = ['short', 'medium', 'long'];
         $length = isset($_POST['length']) && in_array($_POST['length'], $allowedLengths)
             ? $_POST['length']
             : 'medium';
-        
+
         $response = ['success' => false, 'article' => '', 'error' => ''];
-        
+
         if (empty($topic)) {
             $response['error'] = "Please enter a topic";
         } else {
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response['error'] = "Error: " . htmlspecialchars($e->getMessage());
             }
         }
-        
+
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
             border: 1px solid #ccc;
         }
-        
+
         .spinner {
             display: inline-block;
             width: 20px;
@@ -116,9 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             animation: spin 1s ease-in-out infinite;
             vertical-align: middle;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -127,7 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Article Generator</h1>
     <p>Generate high-quality articles using AI</p>
 
-    <form id="article-form" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" autocomplete="off">
+    <form id="article-form" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
+          autocomplete="off">
         <!-- Add CSRF protection token (in a real app you'd implement this) -->
         <!-- <input type="hidden" name="csrf_token" value="<?php /* echo generateCSRFToken(); */ ?>"> -->
         <input type="hidden" name="ajax_request" value="generate" id="ajax-request">
@@ -154,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <button type="submit" id="generate-button">Generate Article</button>
     </form>
-    
+
     <div id="progress-indicator" class="progress-indicator">
         <div class="spinner"></div>
         <span>Generating your article... This may take a minute.</span>
@@ -190,48 +193,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             const topicField = document.getElementById('topic');
             if (topicField.value.trim() === '') {
                 alert('Please enter a topic');
                 return;
             }
-            
+
             // Show the progress indicator
             progressIndicator.style.display = 'block';
             generateButton.disabled = true;
-            
+
             // Create FormData object from the form
             const formData = new FormData(form);
-            
+
             // Send AJAX request using fetch
             fetch('<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                // Hide the progress indicator
-                progressIndicator.style.display = 'none';
-                generateButton.disabled = false;
-                
-                if (data.success) {
-                    // Display the result
-                    articleContent.innerHTML = data.article.replace(/\n/g, '<br>');
-                    resultDiv.style.display = 'block';
-                    // Scroll to the result
-                    resultDiv.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    // Display error
-                    alert(data.error || 'An error occurred while generating the article');
-                }
-            })
-            .catch(error => {
-                console.error('Error generating article:', error);
-                progressIndicator.style.display = 'none';
-                generateButton.disabled = false;
-                alert('An error occurred. Please try again.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    // Hide the progress indicator
+                    progressIndicator.style.display = 'none';
+                    generateButton.disabled = false;
+
+                    if (data.success) {
+                        // Display the result
+                        articleContent.innerHTML = data.article.replace(/\n/g, '<br>');
+                        resultDiv.style.display = 'block';
+                        // Scroll to the result
+                        resultDiv.scrollIntoView({behavior: 'smooth'});
+                    } else {
+                        // Display error
+                        alert(data.error || 'An error occurred while generating the article');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error generating article:', error);
+                    progressIndicator.style.display = 'none';
+                    generateButton.disabled = false;
+                    alert('An error occurred. Please try again.');
+                });
         });
     });
 </script>
